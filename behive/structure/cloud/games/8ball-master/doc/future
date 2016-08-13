@@ -1,0 +1,29 @@
+It would be great to compile in this manner:
+
+string -> ruby AST
+rb AST -> more optimized rb AST 0+ times
+rb AST -> js AST
+js AST -> more optimized js AST 0+ times
+js AST -> string
+
+All 3+ of these passes could be in js or ruby, although it would be somewhat awkward to have any ruby after the js starts.  So in practice, that means there are N+1 possible places to go from ruby to js.  Ideally, the entire toolchain should be in ruby, to the extent to which that is possible.
+
+One possible path to this point is to implement a compiler from jruby AST to js in jruby, and then a parser, AST, optional AST->AST passes, the rbAST->jsAST compiler, and js unparsing in ruby.  Then the whole thing can self-host.
+
+
+'lambda {|x| x + 1 }' should compile something like this:
+(lambda (x) (+ x 1))
+(lambda (x:int) (+ x:int 1))  ; optional typeinference *insert far-future handwaving here*
+(function (x:int) (return (binop+ x:int 1)))
+'function (x){ return x + 1;}'
+
+parsing is pretty hard but has been solved in ruby already: ruby_parser handles it.  The rest of the compiler proper is fairly trivial by comparison.  Likewise, the test suite and most of the standard library are provided by rubinius, and v8 does the runtime.
+
+need classes and modules, then to compile the rendering of the public timeline.
+
+take a look at JS.class.  It looks boss so far-might just include it as part of the runtime, and use the extensions to Array, Hash, etc..
+
+Also take a look at rubyjs.  It appears to be almost a complete solution.
+also, take a look at red.  That is perhaps even closer, and seems to work.
+
+neither red nor rubyjs are usable as such, given that they want to make a single file, and I want to statically compile files.
